@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="boardMapper">
+	<select id="BoardPageList" resultType="hashMap" parameterType="hashMap">
+		SELECT @ROWNUM:=@ROWNUM+1 AS NO,MH.*
+		FROM MH_BOARD MH, (SELECT @ROWNUM:=#{renew}) TMP
+		ORDER BY BNO DESC
+		LIMIT #{renew},#{numPerPage}
+	</select>
+	
+	<select id="boardTotalContents" resultType="_int">
+		SELECT COUNT(*)
+		FROM MH_BOARD
+	</select>
+	
+	<select id="boardSelectOne" resultType="hashMap">
+		SELECT *
+		FROM MH_BOARD
+		WHERE BNO = #{bNo}
+	</select>
+	
+	<insert id='insert' parameterType="Map">
+	    INSERT INTO MH_BOARD(BTITLE, BCONTENT, NICNAME, BDATE, CON, IMGPATH)
+	    VALUES(#{bTitle}, #{bContent}, #{nicname}, SYSDATE(), DEFAULT, #{imgpath})
+	</insert>
+	
+	<delete id="delete" parameterType="_int">
+	    DELETE FROM MH_BOARD
+		WHERE BNO = #{no}
+	</delete>
+	
+	<update id="update" parameterType="hashmap">
+	    UPDATE MH_BOARD SET
+	    BTITLE = #{bTitle},
+	    BCONTENT = #{bContent},
+	    IMGPATH = #{imgpath}
+	    WHERE BNO = #{bNo}
+	</update>
+	
+	<select id="list" parameterType="hashmap" resultType="hashmap">
+		SELECT @ROWNUM:=@ROWNUM+1 AS NO,MH.*
+		FROM MH_BOARD MH, (SELECT @ROWNUM:=#{renew}) TMP
+		WHERE BTITLE LIKE CONCAT ('%',#{keyword},'%')
+		ORDER BY BNO DESC
+		LIMIT #{renew},#{numPerPage}
+	</select>
+	
+	<select id="selectContents" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*)
+		FROM MH_BOARD
+		WHERE BTITLE LIKE CONCAT ('%',#{keyword},'%')
+	</select>
+	
+</mapper>
+
+

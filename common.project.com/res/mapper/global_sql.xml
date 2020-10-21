@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="global">
+	
+	<!--  페이징 상단 -->
+	<sql id="pagingUpper">
+		SELECT @RNUM := @RNUM + 1 AS ROWNUM, LIST.*
+		FROM
+		  (	      
+	</sql>
+	
+	<!--  페이징 하단 -->
+	<sql id="pagingLower">
+		  ) LIST,
+		  ( SELECT @RNUM := 0 ) R
+		  ORDER BY ROWNUM DESC
+		limit #{pageNum}, #{listSize}
+	</sql>
+	
+	<!--  페이징 하단 -->
+	<sql id="pagingLower2">
+		  ) LIST,
+		  ( SELECT @RNUM := 0 ) R
+		  ORDER BY ROWNUM ASC
+		limit #{pageNum}, #{listSize}
+	</sql>	
+	
+	<select id="selectCCSL01_List" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+      <include refid="global.pagingUpper" />
+      
+         select NO, KEYWORD, PORTAL_NAME, COUNT(PORTAL_NAME) as PNCNT, DATE_FORMAT(REGDATE,'%Y.%m.%d %H:%i:%s') as REGDATE 
+            from crawling_url_master
+            where 1=1
+             and substring(REGDATE,1,10) BETWEEN #{startDay} AND #{endDay}
+            <if test="reqType == '01'">
+               and CRAWLING_STATUS = 'ready'
+            </if>
+            <if test="reqType == '02'">
+               and CRAWLING_STATUS = 'process'
+            </if>
+            <if test="reqType == '03'">
+               and CRAWLING_STATUS = 'complete'
+            </if>            
+
+            <if test="searchFlag != null and searchFlag !=''">
+               and PORTAL_NAME = #{searchFlag}
+            </if>
+            <if test="searchName != null and searchName !=''">
+               and KEYWORD like CONCAT('%',#{searchName},'%')
+            </if>
+
+            group by PORTAL_NAME, KEYWORD
+            order by REGDATE asc
+          
+     <include refid="global.pagingLower" />
+   </select>
+	
+</mapper>
